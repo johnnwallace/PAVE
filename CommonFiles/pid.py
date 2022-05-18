@@ -1,5 +1,6 @@
 import math
 
+
 class PIDController:
     # MaxTurnSpeed is fastest turn speed in degrees/s, #dt is timestep in s
     def __init__(self, setPoint, Kp, Ki, Kd, Ks, maxCommand):
@@ -14,7 +15,9 @@ class PIDController:
 
     def updateError(self, currentState, dt):  # update error and setpoint values
         self.error = self.setPoint - currentState  # get error
-        self.integralError += self.error * dt  # get cumulative error
+        self.integralError += (
+            self.error - self.saturationError * self.Ks
+        ) * dt  # get cumulative error
         # get derivative of error
         self.derivativeError = (self.error - self.lastError) / dt
         self.lastError = self.error  # save current error
@@ -31,11 +34,13 @@ class PIDController:
             self.Kp * self.error
             + self.Ki * self.integralError
             + self.Kd * self.derivativeError
-            - self.Ks * self.saturationError
         )
-        self.saturationError = out - self.maxCommand
 
         if abs(out) > self.maxCommand:
-            return math.copysign(self.maxCommand, out)
+            outSaturated = math.copysign(self.maxCommand, out)
+        else:
+            outSaturated = out
 
-        return out
+        self.saturationError = out - outSaturated
+
+        return outSaturated
