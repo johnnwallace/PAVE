@@ -2,10 +2,10 @@ import math
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import UniversalFiles.bn880
-import UniversalFiles.hmc5883l
-import UniversalFiles.micropyGPS
-import UniversalFiles.humPro
+import bn880
+import hmc5883l
+import micropyGPS
+import humPro
 
 
 # from steering import PIDController as PID
