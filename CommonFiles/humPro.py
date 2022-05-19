@@ -12,6 +12,8 @@ class humPro:
         self.RX = Pin(rxPin, Pin.IN)  # RX pin
         self.MODE_IND = Pin(modeIndPin, Pin.IN)  # MODE_IND pin
         self.uart = UART(0, 9600, tx=self.TX, rx=self.RX)  # initialize UART
+        self.buff = self.data = ""
+        self.DATA_LEN = 32
 
     def transmitData(self, data):
         if self.CTS.value() == 0:
@@ -21,9 +23,32 @@ class humPro:
         else:
             return False
 
+    def readPacket(self):
+        return self.uart.readline()
+
     # used to read data from the uart connection with the HumPRO
     def readData(self):
-        return self.uart.readline()
+        packet = self.readPacket()
+        
+        if packet is not None:
+            try:
+                packetStr = packet.decode("utf-8")
+             
+                for x in range(len(packetStr)):
+                    char = packetStr[x]
+                    
+                    if char != 'x' and char != '\n':
+                        self.buff += char
+                    elif char == 'x':
+                        if len(self.buff) == self.DATA_LEN:
+                            self.data = self.buff
+                        self.buff = ""
+                                        
+            except UnicodeError:
+                 print("Invalid packet")
+                 
+    def getData(self):
+        return self.data
 
     def transmitRandNumber(self):
         num = self.generateRandom()
@@ -42,9 +67,8 @@ class humPro:
         self.transmitData(string)
 
     def transmitTelemetry(self, lat, long, heading):
-        self.transmitData("x")  # send start character
-        self.transmitData(lat)
-        self.transmitData(" ")
-        self.transmitData(long)
-        self.transmitData(" ")
-        self.transmitData(heading)
+        outString = 'x' + str(round(lat, 5)).zfill(8) + ", " + str(round(long, 5)).zfill(8) + ", " + str(round(heading, 5).zfill(8))
+
+        self.transmitData(outString)
+
+

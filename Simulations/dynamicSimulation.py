@@ -139,7 +139,7 @@ minTurnRadius = 6  # meters (~20 ft)
 kp = 2
 ki = 2
 kd = 2
-ks = 0
+ks = 1
 
 # Initial Boat State Variables
 init_x = 0  # meters
