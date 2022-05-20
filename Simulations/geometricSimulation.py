@@ -209,13 +209,14 @@ for i, angle in enumerate(headings):
 ## RUN SIMULATION (DAVID AND WILL'S CODE) ----------------------------------------------------------------------------
 
 # All in seconds
+count = 0
 t = 0
 t1 = 50  # change setpoint at t1
 tf = 100
 dt = 0.01
 
 # Assumptions
-maxMotorAngle = 1000  # degrees
+maxMotorAngle = 300  # degrees
 motorTurnRate = 45  # degrees/ sec PROB WRONG
 minTurnRadius = 0.00001  # meters (~20 ft)
 
@@ -255,7 +256,27 @@ boat = Boat(
 
 controller = PID(0, kp, ki, kd, ks, maxMotorAngle)
 
+headings_history = []
+
 for heading in headings:
+    headings_history.append(heading)
+    if count % 30 == 0:
+        starting_point = np.array([boat.getX(), boat.getY()])
+        paths = get_full_path(starting_point, start_angle, velocity, buoys)
+
+        paths = np.concatenate(paths)
+
+        headings = np.array([])
+        for i, point in enumerate(paths[:-1]):
+            angle = get_angle(paths[i], paths[i + 1])
+            if i > 0 and np.abs(angle - headings[-1]) > 2:
+                angle -= 2 * np.pi
+            headings = np.append(headings, angle)
+
+        # convert to degs
+        for i, angle in enumerate(headings):
+            headings[i] = np.degrees(angle)
+
     controller.updateSetpoint(heading)
 
     controller.updateError(boat.getTheta(), dt)
@@ -270,6 +291,8 @@ for heading in headings:
     xHistory = np.append(xHistory, boat.getX())
     yHistory = np.append(yHistory, boat.getY())
     speedHistory = np.append(speedHistory, boat.getSpeed())
+
+    count += 1
     t += dt
 
 print(t)
@@ -295,7 +318,7 @@ axs[0, 2].set_title("motor angle vs. t")
 axs[1, 2].plot(time_fit, errorHistory[:-2])
 axs[1, 2].set_title("error vs. t")
 
-axs[2, 0].plot(time_fit, headings[:-1])
+axs[2, 0].plot(time_fit, headings_history[:-1])
 axs[2, 0].set_title("heading vs. t")
 
 plt.show()
