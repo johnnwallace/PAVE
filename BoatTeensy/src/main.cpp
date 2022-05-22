@@ -49,8 +49,8 @@ void WriteToLinearRight(int dir, int pwm)
     //   dir = 0;
     // }
 
-    analogWrite(3, min(255, dir * 30)); // direction of actuator movement
-    analogWrite(4, min(255, pwm));      // speed of movement
+    // analogWrite(3, min(255, dir * 30)); // direction of actuator movement
+    // analogWrite(4, min(255, pwm));      // speed of movement
     // pins are 3 and 4
 }
 
@@ -64,8 +64,8 @@ void WriteToLinearLeft(int dir, int pwm)
     //   dir = 0;
     // }
 
-    analogWrite(12, min(255, dir * 30));
-    analogWrite(16, min(255, pwm));
+    // analogWrite(12, min(255, dir * 30));
+    // analogWrite(16, min(255, pwm));
     // pins are 3 and 4
 }
 
@@ -98,34 +98,38 @@ void loop()
 
     // READ FROM PICO HERE
 
-    // if (Serial2.available())
-    // {
-    //     int in = Serial2.readStringUntil('\n').toInt();
-    //     // Serial.println(in);
-    //     pos = in / 1000;               // get first 3 digits
-    //     throttleVal = in - pos * 1000; // get last 3 digits
-    //     pos -= 150;
-    //     throttleVal -= 150;
-    // }
+    if (Serial2.available())
+    {
+        Serial.println(Serial2.readStringUntil('\n'));
+
+        // int in = Serial2.readStringUntil('\n').toInt();
+        // Serial.println(in);
+        // pos = in / 1000;               // get first 3 digits
+        // throttleVal = in - pos * 1000; // get last 3 digits
+        // pos -= 150;
+        // throttleVal -= 150;
+    }
 
     // Serial.println(String(pos) + ", " + String(throttleVal));
 
-    if (count == 1000)
-    {
-        count = 0;
-        if (throttle.getVolts() < 1.5)
-        {
-            throttle.setVolts(3);
-        }
-        else
-        {
-            throttle.setVolts(1);
-        }
-    }
+    // MANUAL THROTTLE CONTROL
+
+    // if (count == 1000)
+    // {
+    //     count = 0;
+    //     if (throttle.getVolts() < 1.5)
+    //     {
+    //         throttle.setVolts(3);
+    //     }
+    //     else
+    //     {
+    //         throttle.setVolts(1);
+    //     }
+    // }
 
     // throttleVolts = doubleMap(throttleVal, 0, 300, 0.1, 3.3);
 
-    Serial.println(String(throttle.getSetPoint()) + ", " + String(throttle.getVal()) + ", " + String(throttle.getVolts()));
+    // Serial.println(String(throttle.getSetPoint()) + ", " + String(throttle.getVal()) + ", " + String(throttle.getVolts()));
 
     analogWrite(A14, throttle.getVal());
 
@@ -187,7 +191,7 @@ void loop()
         {
             if (steeringDifLeft > -deadzone)
                 steeringDifLeft = 0;
-            WriteToLinearLeft(255, -steeringDifLeft);
+            // WriteToLinearLeft(255, -steeringDifLeft);
         }
     }
 
