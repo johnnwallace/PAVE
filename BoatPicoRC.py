@@ -5,9 +5,12 @@ from bn880 import BN880
 from humPro import humPro
 import math
 
+DO_TELEM = False
+
 # check that correct PINs are set on hmc5883l library
-compass = HMC5883L()
-gps = BN880()
+if DO_TELEM:
+    compass = HMC5883L()
+    gps = BN880()
 
 rf = humPro(
     crespPin=27, bePin=21, cmdPin=26, ctsPin=22, txPin=16, rxPin=17, modeIndPin=18
@@ -27,12 +30,13 @@ throttle = 150
 while True:
     sleep(0.1)
     led.toggle()
-    
+
     byteIn = rf.readPacket()
 
     if byteIn is not None:
         strIn = byteIn.decode("utf-8")
-        
+        print(strIn)
+
         if strIn == "w\n":
             throttle += 1
             print("Increase throttle")
@@ -45,22 +49,28 @@ while True:
         elif strIn == "d\n":
             steering -= 1
             print("Steer right")
-        
-        if strIn != '\n': print(strIn)
-            
+        elif strIn == "c\n":
+            steering = 150
+            print("Reset steering")
 
-    x, y, z = compass.read()
-    deg, minutes = compass.heading(x, y)
-    heading = (deg + minutes / 60) * math.pi / 180
-    
-    lat, long = gps.read()
-    
-    formatLat = "%09.5f" % lat
-    formatLong = "%010.5f" % long
-    formatHeading = "%09.5f" % heading
-    
+        if strIn != "\n":
+            print(strIn)
+
     strControl = str(steering) + str(throttle)
-    uart.write(strControl+'\n')
-    strOut = 'x' + formatLat + ", " + formatLong + ", " + formatHeading
-    #print(strOut)
-    rf.transmitData(strOut)
+    uart.write(strControl + "\n")
+    print(strControl)
+
+    if DO_TELEM:
+        x, y, z = compass.read()
+        deg, minutes = compass.heading(x, y)
+        heading = (deg + minutes / 60) * math.pi / 180
+
+        lat, long = gps.read()
+
+        formatLat = "%09.5f" % lat
+        formatLong = "%010.5f" % long
+        formatHeading = "%09.5f" % heading
+
+        strOut = "x" + formatLat + ", " + formatLong + ", " + formatHeading
+        # print(strOut)
+        rf.transmitData(strOut)

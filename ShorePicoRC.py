@@ -11,19 +11,23 @@ rf = humPro(
 file = open("data.txt", "w").close()
 file = open("data.txt", "w")
 
+led = machine.Pin(25, machine.Pin.OUT)
+
 while True:
     sleep(0.1)
+    led.toggle()
 
     list = uselect.select([sys.stdin], [], [], 0.01)
 
     if list[0]:
         byte = sys.stdin.read(1)
+        print(byte)
         rf.transmitData(byte)
     else:
         byte = None
 
-    rf.readData()
-    out = rf.getData()
+    # rf.readData()
+    # out = rf.getData()
 
-    print(out)
-    file.write(out + "\n")
+    # print(out)
+    # file.write(out + "\n")

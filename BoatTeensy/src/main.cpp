@@ -49,8 +49,8 @@ void WriteToLinearRight(int dir, int pwm)
     //   dir = 0;
     // }
 
-    // analogWrite(3, min(255, dir * 30)); // direction of actuator movement
-    // analogWrite(4, min(255, pwm));      // speed of movement
+    analogWrite(3, min(255, dir * 30)); // direction of actuator movement
+    analogWrite(4, min(255, pwm));      // speed of movement
     // pins are 3 and 4
 }
 
@@ -64,8 +64,8 @@ void WriteToLinearLeft(int dir, int pwm)
     //   dir = 0;
     // }
 
-    // analogWrite(12, min(255, dir * 30));
-    // analogWrite(16, min(255, pwm));
+    analogWrite(12, min(255, dir * 30));
+    analogWrite(16, min(255, pwm));
     // pins are 3 and 4
 }
 
@@ -81,7 +81,6 @@ void setup()
 // Read the current position of the encoder and print out when changed.
 void loop()
 {
-    delay(10);
 
     static int pos = 0;
     static int throttleVal = 0;
@@ -100,15 +99,17 @@ void loop()
 
     if (Serial2.available())
     {
-        Serial.println(Serial2.readStringUntil('\n'));
-
-        // int in = Serial2.readStringUntil('\n').toInt();
-        // Serial.println(in);
-        // pos = in / 1000;               // get first 3 digits
-        // throttleVal = in - pos * 1000; // get last 3 digits
-        // pos -= 150;
-        // throttleVal -= 150;
+        // Serial.println(Serial2.readStringUntil('\n'));
+        int in = Serial2.readStringUntil('\n').toInt();
+        Serial.println(in);
+        pos = in / 1000;               // get first 3 digits
+        throttleVal = in - pos * 1000; // get last 3 digits
+        pos -= 150;
+        throttleVal -= 150;
     }
+
+    throttleVolts = doubleMap(throttleVal, 0, 300, 0.1, 3.3);
+    throttle.setVolts(throttleVolts);
 
     // Serial.println(String(pos) + ", " + String(throttleVal));
 
@@ -129,7 +130,7 @@ void loop()
 
     // throttleVolts = doubleMap(throttleVal, 0, 300, 0.1, 3.3);
 
-    // Serial.println(String(throttle.getSetPoint()) + ", " + String(throttle.getVal()) + ", " + String(throttle.getVolts()));
+    Serial.println(String(pos) + ", " + String(throttle.getVal()));
 
     analogWrite(A14, throttle.getVal());
 
