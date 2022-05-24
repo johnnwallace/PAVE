@@ -21,6 +21,8 @@ public:
     void setVolts(double val);
     uint8_t getVal();
 
+    String toString();
+
     void update();
 };
 

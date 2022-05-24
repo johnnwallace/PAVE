@@ -27,37 +27,58 @@ sleep(0.5)
 steering = 150
 throttle = 150
 
+count = 0
+
 while True:
     sleep(0.1)
     led.toggle()
 
     byteIn = rf.readPacket()
+    count += 1
+    # print(count)
 
     if byteIn is not None:
-        strIn = byteIn.decode("utf-8")
-        print(strIn)
+        strIn = byteIn.decode("utf-8").replace("\n", "")
+        # print(strIn)
 
-        if strIn == "w\n":
-            throttle += 1
-            print("Increase throttle")
-        elif strIn == "s\n":
-            throttle -= 1
-            print("Deacrease throttle")
-        elif strIn == "a\n":
-            steering += 1
-            print("Steer left")
-        elif strIn == "d\n":
-            steering -= 1
-            print("Steer right")
-        elif strIn == "c\n":
+        if strIn == "w":
+            if throttle < 300:
+                throttle += 1
+            # print("Increase throttle")
+        elif strIn == "s":
+            if throttle > 0:
+                throttle -= 1
+            # print("Deacrease throttle")
+        elif strIn == "a":
+            if steering < 300:
+                steering += 1
+            # print("Steer left")
+        elif strIn == "d":
+            if steering > 0:
+                steering -= 1
+            # print("Steer right")
+        elif strIn == "x":
             steering = 150
-            print("Reset steering")
+            # print("Reset steering")
+        elif strIn == "c":
+            throttle = 0
+            # print("Reset throttle")
+        elif strIn == "p":
+            throttle = 0
+            steering = 150
 
-        if strIn != "\n":
-            print(strIn)
+        # if strIn != '\n': print(strIn)
 
-    strControl = str(steering) + str(throttle)
-    uart.write(strControl + "\n")
+    if steering < 0:
+        steering = 0
+    if throttle < 0:
+        throttle = 0
+
+    steeringFormat = "%03d" % steering
+    throttleFormat = "%03d" % throttle
+
+    strControl = steeringFormat + throttleFormat
+    # uart.write(strControl+'\n')
     print(strControl)
 
     if DO_TELEM:

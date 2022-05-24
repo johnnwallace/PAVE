@@ -28,15 +28,13 @@
 
 int previoussteeringDifRight = 0;
 int previoussteeringDifLeft = 0;
-double throttleVolts = 0;
-uint8_t throttleOut = 0;
 
 int steeringDifRight = 0;
 int steeringDifLeft = 0;
 
 // teensy analog voltage testing for throttle
 unsigned int count = 0;
-Throttle throttle(0.1, 0.01);
+Throttle throttle(0.00001, 0.01);
 
 // dir indicates direction of actuator movement
 void WriteToLinearRight(int dir, int pwm)
@@ -81,9 +79,8 @@ void setup()
 // Read the current position of the encoder and print out when changed.
 void loop()
 {
-
+    static int throttleVal, throttleVolts;
     static int pos = 0;
-    static int throttleVal = 0;
     encoder.tick();
     throttle.update();
 
@@ -97,19 +94,49 @@ void loop()
 
     // READ FROM PICO HERE
 
-    if (Serial2.available())
+    if (Serial.available())
     {
         // Serial.println(Serial2.readStringUntil('\n'));
-        int in = Serial2.readStringUntil('\n').toInt();
-        Serial.println(in);
+        int in = Serial.readStringUntil('\n').toInt();
+
         pos = in / 1000;               // get first 3 digits
         throttleVal = in - pos * 1000; // get last 3 digits
         pos -= 150;
-        throttleVal -= 150;
+
+        Serial.println(throttleVal);
+
+        // throttleVolts = doubleMap(throttleVal, 0, 300, 0.1, 4.2);
+        if (throttleVal < 25)
+        {
+            throttleVolts = 0.5;
+        }
+        else if (throttleVal < 50)
+        {
+            throttleVolts = 1;
+        }
+        else if (throttleVal < 75)
+        {
+            throttleVolts = 1.5;
+        }
+        else if (throttleVal < 100)
+        {
+            throttleVolts = 2;
+        }
+        else if (throttleVal < 125)
+        {
+            throttleVolts = 2.5;
+        }
+        else
+        {
+            throttleVolts = 0.1;
+        }
+        throttle.setVolts(throttleVolts);
     }
 
-    throttleVolts = doubleMap(throttleVal, 0, 300, 0.1, 3.3);
-    throttle.setVolts(throttleVolts);
+    // throttle.setVolts(throttleVolts);
+    analogWrite(A14, throttle.getVal());
+
+    // Serial.println(throttle.getVal());
 
     // Serial.println(String(pos) + ", " + String(throttleVal));
 
@@ -117,22 +144,23 @@ void loop()
 
     // if (count == 1000)
     // {
+    //     // Serial.println("hi0");
     //     count = 0;
     //     if (throttle.getVolts() < 1.5)
     //     {
+    //         Serial.println("hi1");
     //         throttle.setVolts(3);
     //     }
     //     else
     //     {
+    //         Serial.println("hi2");
     //         throttle.setVolts(1);
     //     }
     // }
 
     // throttleVolts = doubleMap(throttleVal, 0, 300, 0.1, 3.3);
 
-    Serial.println(String(pos) + ", " + String(throttle.getVal()));
-
-    analogWrite(A14, throttle.getVal());
+    // Serial.println(throttle.getVal());
 
     // Serial.println(String(pos) + ", " + String(throttle));
     //  correct so that 0 is no steering

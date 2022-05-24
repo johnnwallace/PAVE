@@ -216,7 +216,7 @@ tf = 100
 dt = 0.01
 
 # Assumptions
-maxMotorAngle = 300  # degrees
+maxMotorAngle = 20  # degrees
 motorTurnRate = 45  # degrees/ sec PROB WRONG
 minTurnRadius = 0.00001  # meters (~20 ft)
 
@@ -294,8 +294,6 @@ for heading in headings:
 
     count += 1
     t += dt
-
-print(t)
 
 time_fit = np.linspace(0, t, num=int(t / dt))  # Time axis
 thetaHistory = thetaHistory[:-2].transpose()  # Turn thetaHistory into a row vector

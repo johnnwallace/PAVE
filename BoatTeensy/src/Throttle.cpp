@@ -57,3 +57,8 @@ double doubleMap(double x, double in_min, double in_max, double out_min, double 
 {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+String Throttle::toString()
+{
+    return String(setPoint) + ", " + String(thisVolts) + ", " + String(getVal());
+}
